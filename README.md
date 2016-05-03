@@ -1,11 +1,8 @@
 # Rebellion
-## 1. 功能说明
-### 1.1 基本功能
+## Introduction
 Rebellion是lain中负责管理日志数据的layer0组件, 以host模式运行在docker上。但Rebellion并不是单进程的容器，而是由supervisord管理的多进程容器。Rebellion主要包括两个部分：
 - [Hekalain](https://github.com/laincloud/hekalain)：负责接受日志输入、处理并发送。
 - Rebellion程序：负责在启动时生成Hekad的配置文件。并监听lainlet，当集群配置更新或应用更新时，及时更新Hekad的配置文件并重启Hekad。
-
-### 1.2 日志流
 
 Rebellion处理的日志流如下图所示。
 
@@ -22,9 +19,9 @@ Rebellion目前主要处理三类日志流：
   - 批量发送：结构化的access log会交给WebRouterKafkaFilter加工（增加topic和host)，然后交给Kafka做进一步的分析。
 
 
-## 2. 编译运行环境
+## Compile and Run
 
-### 2.1 编译方式
+### Compile
 运行项目中的build.sh即可完成一键发布，前提是jenkins上应该已经有发布的hekalain。
 
 > Dockerfile是编译时运行的文件
@@ -33,7 +30,7 @@ Rebellion目前主要处理三类日志流：
 
 Jenkins上面已经配置好了本工程的自动构建(lain-rebellion\_\_release\_\_)，构建时会执行build.sh脚本。构建成功后会上传image至xxxxx。版本更新时，务必更新build.sh和main.go里面的版本号，该版本号对应了image的tag。
 
-### 2.2 运行方式
+### Run
 Rebellion的运行是以Host模式运行的Container，目前已经作为Service在boostrap时就已经部署并运行了。
 Service中运行的指令为：
 
@@ -53,7 +50,7 @@ docker run --name rebellion.service --rm --net="host" \
 
 > 目前由于所有的日志都发送至Kafka，所以部署时集群应该在etcd中配置了/lain/config/kafka
 
-## 3. 扩展Rebellion
+## Extension
 
 目前Rebellion是以渲染hekad的配置模板的方式进行动态配置hekad。所有模板都放在templates文件夹下。模板语法以及渲染方式都是golang text/template包原生的。
 
@@ -82,3 +79,6 @@ type DynamicHandler interface {
   并在NewRebellion中注册该实现的结构体。DynamicallyHandle()实现时需要自己调用renderTemplate()函数进行模板渲染，并通过给channel发送任意的int值通知rebellion重启hekad，以使新配置生效。动态渲染的冷却时间是3秒。
 
   > 示例: [WebrouterConfHandler](http://github.com/laincloud/rebellion/blob/master/core/webrouter.go)
+
+## License
+Rebellion遵循[MIT](https://github.com/laincloud/rebellion/blob/master/LICENSE)开源协议.
