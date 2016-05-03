@@ -1,0 +1,15 @@
+FROM laincloud/centos-lain:20160428.1
+# Dockerfile for releasing rebellion
+
+RUN mkdir -p /var/log/supervisor && \
+    mkdir -p /etc/hekaconf.d && \
+    pip install supervisor
+
+COPY conf/supervisord.conf /etc/
+COPY templates /rebellion/templates/
+COPY rebellion /rebellion/
+COPY heka-lain /
+
+VOLUME ["/data/lain/volumes/", "/data/heka/cache/", "/var/log/supervisor/", "/data/heka/local/"]
+EXPOSE 8178 9003
+ENTRYPOINT ["supervisord", "-c", "/etc/supervisord.conf"]

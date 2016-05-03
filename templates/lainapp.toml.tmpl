@@ -1,0 +1,21 @@
+# Heka config for lain app: {{.AppName}} {{$nodeName := .NodeName}} {{$appName := .AppName}}
+{{range $key, $proc := .Procs}}
+[log_{{$key}}]
+type = "LogstreamerInput"
+hostname = "{{$nodeName}}"
+log_directory = "{{$proc.LogDirectory}}"
+file_match = '{{$proc.FilePattern}}'
+oldest_duration = "48h"
+splitter = "TokenSplitter"
+decoder = "decoder_{{$key}}"
+
+[decoder_{{$key}}]
+type = "LainAppRetagDecoder"
+message_type = "lain-app-log"
+app_name = "{{$appName}}"
+proc_name = "{{$proc.ProcName}}"
+instance_no = {{$proc.InstanceNo}}
+kafka_topic = "{{$proc.Topic}}"
+log_file = "{{$proc.LogFile}}"
+
+{{end}}

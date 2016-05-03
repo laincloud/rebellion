@@ -1,0 +1,4 @@
+[graphite_output]
+type = "CarbonOutput"
+message_matcher = "Type == 'graphite.stat'"
+address = "graphite.lain:{{ .GraphitePort }}"
