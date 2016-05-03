@@ -2,7 +2,7 @@
 set -e
 version=2.0.0
 tmp_image='rebellion_build'
-registry='docker.bdp.cc:5002'
+registry='registry.aliyuncs.com/laincloud'
 docker build --no-cache -t $tmp_image .
 tmp_container='rebellion_instance'
 docker create --name $tmp_container rebellion_build

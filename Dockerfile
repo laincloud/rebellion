@@ -1,7 +1,7 @@
 FROM laincloud/centos-lain:20160428.1
 # Dockerfile for building rebellion
 
-ENV dest $GOPATH/src/laingit.bdp.cc/lain/rebellion
+ENV dest $GOPATH/src/github.com/laincloud/rebellion
 
 #Build rebellion
 COPY . $dest/
