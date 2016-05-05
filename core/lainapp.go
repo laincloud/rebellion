@@ -55,11 +55,10 @@ func NewLainAppConfHandler() *LainAppConfHandler {
 // DynamicallyHandle implements DynamicalHandler
 func (lh *LainAppConfHandler) DynamicallyHandle(update chan int) {
 	lainletCli := client.New(lainletURL)
-	ctx, _ := context.WithTimeout(context.Background(), time.Second)
 	var isChanged bool
 	for {
 		time.Sleep(3 * time.Second)
-		ch, err := lainletCli.Watch("/v2/rebellion/localprocs", ctx)
+		ch, err := lainletCli.Watch("/v2/rebellion/localprocs", context.Background())
 		if err != nil {
 			log.Warn("Connect to lainlet failed. Reconnect in 10 seconds")
 			continue

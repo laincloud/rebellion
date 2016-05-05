@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/laincloud/lainlet/client"
 	"github.com/mijia/sweb/log"
 	"golang.org/x/net/context"
-	"github.com/laincloud/lainlet/client"
 )
 
 // WebrouterConfHandler renders webrouter.toml dynamically
@@ -29,10 +29,9 @@ func NewWebrouterConfHandler() *WebrouterConfHandler {
 // DynamicallyHandle implements DynamicalHandler
 func (wh *WebrouterConfHandler) DynamicallyHandle(update chan int) {
 	lainletCli := client.New(lainletURL)
-	ctx, _ := context.WithTimeout(context.Background(), time.Second)
 	for {
 		time.Sleep(3 * time.Second)
-		ch, err := lainletCli.Watch("/v2/containers?nodename="+hostName, ctx)
+		ch, err := lainletCli.Watch("/v2/containers?nodename="+hostName, context.Background())
 		if err != nil {
 			log.Warn("Connect to lainlet failed. Reconnect in 10 seconds")
 			continue

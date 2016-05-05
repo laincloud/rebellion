@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-version=2.0.0
+version=2.0.2
 tmp_image='rebellion_build'
 registry='registry.aliyuncs.com/laincloud'
 docker build --no-cache -t $tmp_image .
@@ -10,7 +10,11 @@ docker cp $tmp_container:/rebellion ./
 docker rm -f $tmp_container
 docker rmi -f $tmp_image
 
-wget http://jenkins.lain.bdp.cc/job/hekalain__master__release/lastSuccessfulBuild/artifact/heka-lain.tgz
+# Build hekalain
+git clone https://github.com/laincloud/hekalain.git
+./hekalain/build.sh
+rm -rf hekalain
+
 tar -xvf heka-lain.tgz
 rm -f heka-lain.tgz
 heka_dir=`ls -d heka-lain-*`
