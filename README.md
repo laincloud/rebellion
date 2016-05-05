@@ -29,8 +29,6 @@ Rebellion目前主要处理三类日志流：
 
 > Dockerfile.release是发布时运行的文件
 
-Jenkins上面已经配置好了本工程的自动构建(lain-rebellion\_\_release\_\_)，构建时会执行build.sh脚本。构建成功后会上传image至xxxxx。版本更新时，务必更新build.sh和main.go里面的版本号，该版本号对应了image的tag。
-
 ### Run
 Rebellion的运行是以Host模式运行的Container，目前已经作为Service在boostrap时就已经部署并运行了。
 Service中运行的指令为：

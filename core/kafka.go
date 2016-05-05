@@ -5,9 +5,9 @@ import (
 	"sort"
 	"time"
 
+	"github.com/laincloud/lainlet/client"
 	"github.com/mijia/sweb/log"
 	"golang.org/x/net/context"
-	"github.com/laincloud/lainlet/client"
 )
 
 // KafkaConfHandler renders kafka.toml dynamically
@@ -23,10 +23,9 @@ func NewKafkaConfHandler() *KafkaConfHandler {
 // DynamicallyHandle implements DynamicalHandler
 func (kc *KafkaConfHandler) DynamicallyHandle(update chan int) {
 	lainletCli := client.New(lainletURL)
-	ctx, _ := context.WithTimeout(context.Background(), time.Second)
 	for {
 		time.Sleep(3 * time.Second)
-		ch, err := lainletCli.Watch("/v2/configwatcher?target=kafka", ctx)
+		ch, err := lainletCli.Watch("/v2/configwatcher?target=kafka", context.Background())
 		if err != nil {
 			log.Warn("Connect to lainlet failed. Reconnect in 10 seconds")
 			continue
