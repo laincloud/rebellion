@@ -10,6 +10,8 @@ COPY templates /rebellion/templates/
 COPY rebellion /rebellion/
 COPY heka-lain /
 
+ENV GODEBUG=cgocheck=0
+
 VOLUME ["/data/lain/volumes/", "/data/heka/cache/", "/var/log/supervisor/", "/data/heka/local/"]
 EXPOSE 8178 9003
 ENTRYPOINT ["supervisord", "-c", "/etc/supervisord.conf"]
