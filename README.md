@@ -1,7 +1,7 @@
 # Rebellion
 [![MIT license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
 ## Introduction
-Rebellion是lain中负责管理日志数据的layer0组件, 以host模式运行在docker上。但Rebellion并不是单进程的容器，而是由supervisord管理的多进程容器。Rebellion主要包括两个部分：
+Rebellion是LAIN中负责管理日志数据的layer0组件, 以host模式运行在docker上。但Rebellion并不是单进程的容器，而是由supervisord管理的多进程容器。Rebellion主要包括两个部分：
 - [Hekalain](https://github.com/laincloud/hekalain)：负责接受日志输入、处理并发送。
 - Rebellion程序：负责在启动时生成Hekad的配置文件。并监听lainlet，当集群配置更新或应用更新时，及时更新Hekad的配置文件并重启Hekad。
 
