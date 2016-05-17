@@ -3,7 +3,7 @@ set -e
 version=2.0.3
 rm -rf hekalain heka-lain.tgz rebellion
 tmp_image='rebellion_build'
-registry='registry.aliyuncs.com'
+registry='registry.aliyuncs.com/laincloud'
 docker build --no-cache -t $tmp_image .
 tmp_container='rebellion_instance'
 docker create --name $tmp_container rebellion_build
