@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	version        = "2.0.3"
+	version        = "2.0.4"
 	defaultConfDir = "/etc/hekaconf.d/"
 )
 

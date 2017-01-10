@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-version=2.0.3
+version=2.0.4
 rm -rf hekalain heka-lain.tgz rebellion
 tmp_image='rebellion_build'
 registry='registry.aliyuncs.com/laincloud'
