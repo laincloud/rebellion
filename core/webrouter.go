@@ -31,7 +31,7 @@ func (wh *WebrouterConfHandler) DynamicallyHandle(update chan int) {
 	lainletCli := client.New(lainletURL)
 	for {
 		time.Sleep(3 * time.Second)
-		ch, err := lainletCli.Watch("/v2/containers?nodename="+hostName, context.Background())
+		ch, err := lainletCli.Watch("/v2/containers?nodename="+hostName+"/", context.Background())
 		if err != nil {
 			log.Warn("Connect to lainlet failed. Reconnect in 10 seconds")
 			continue
