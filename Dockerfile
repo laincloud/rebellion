@@ -1,4 +1,4 @@
-FROM laincloud/centos-lain:20160503
+FROM laincloud/centos-lain:20170103
 # Dockerfile for building rebellion
 
 ENV dest $GOPATH/src/github.com/laincloud/rebellion
