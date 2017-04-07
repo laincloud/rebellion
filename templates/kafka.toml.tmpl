@@ -33,6 +33,7 @@ topic_variable = "Fields[kafka_topic]"
 addrs = {{.KafkaAddrs}}
 encoder = "SyslogLainEncoder"
 max_buffer_time = 15000
+max_buffered_bytes = 102400
 use_buffering = true
 
 [lain_kafka_output.buffering]
@@ -47,6 +48,7 @@ topic_variable = "Fields[kafka_topic]"
 addrs = {{.KafkaAddrs}}
 encoder = "WebRouterKafkaEncoder"
 max_buffer_time = 15000
+max_buffered_bytes = 102400
 use_buffering = true
 
 [webrouter_kafka_output.buffering]
