@@ -1,5 +1,7 @@
-FROM laincloud/centos-lain:20170103
+FROM laincloud/centos-lain:20170405
 # Dockerfile for building rebellion
+
+RUN pip install supervisor && yum clean all
 
 ENV dest $GOPATH/src/github.com/laincloud/rebellion
 

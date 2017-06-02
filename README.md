@@ -2,21 +2,21 @@
 [![MIT license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
 ## Introduction
 Rebellion是LAIN中负责管理日志数据的layer0组件, 以host模式运行在docker上。但Rebellion并不是单进程的容器，而是由supervisord管理的多进程容器。Rebellion主要包括两个部分：
-- [Hekalain](https://github.com/laincloud/hekalain)：负责接受日志输入、处理并发送。
-- Rebellion程序：负责在启动时生成Hekad的配置文件。并监听lainlet，当集群配置更新或应用更新时，及时更新Hekad的配置文件并重启Hekad。
+- [lain-filebeat](https://github.com/laincloud/filebeat)：负责接受日志输入、处理并发送。
+- Rebellion 程序：负责在启动时生成 lain-filebeat 的配置文件。并监听 lainlet，当集群配置更新或应用更新时，及时更新lain-filebeat 的配置文件并重启 lain-filebeat。
 
-Rebellion处理的日志流如下图所示。
+Rebellion 处理的日志流如下图所示。
 
 ![Resize icon](https://github.com/laincloud/rebellion/blob/master/log_flow.png)
 
-Rebellion目前主要处理三类日志流：
+Rebellion 目前主要处理三类日志流：
 
-- Docker的Syslog：Rebellion通过Host模式绑定主机的8178端口，接收来自rsyslog的日志输入，并通过RsyslogDecoder解析，通过SyslogLainFilter加工，然后通过KafkaOutput输出至Kafka。
+- Docker 的 Syslog：Rebellion 通过只读挂载主机的 /var/log/messages，并通过 parse_regex_fields 解析，通过tag_lain_fields 加工，然后输出至Kafka。
 
-- LainApp的log文件：Rebellion通过只读形式volume的/data/lain/volume文件夹，用LogStreamerInput读取应用配置的日志文件，在LainAppRetagDecoder中解析并加工成和syslog兼容的日志格式，发给Kafka。
+- LainApp 的 log文件：Rebellion 通过只读形式 volume 的 /data/lain/volume 文件夹，用 LogStreamerInput读取应用配置的日志文件，通过tag_lain_fields 加工，然后输出至Kafka。
 
-- Webrouter的access log：Rebellion通过LogStreamerInput读取webrouter volume出来的*.access.log文件，使用hekad自带的NginxAccessLogDecoder解析得到每个请求的结构化日志。该日志会同时以实时和批量的形式进行处理：
-  - 实时监控：结构化的access log会交给HTTPStatusFilter进行QPM，平均响应时间，5XX错误的统计，HTTPStatusFilter会按照配置的ticker_interval定时发送消息给Graphite做监控。
+- Webrouter 的 access log：Rebellion 通过读取webrouter volume出来的*.access.log文件，使用 parse_regex_fields 解析得到每个请求的结构化日志。该日志会同时以实时和批量的形式进行处理：
+  - 实时监控：结构化的 access log 会交给 tag_lain_fields 进行 QPM，平均响应时间，5XX 错误的统计，HTTPStatusFilter 会按照配置的 ticker_interval定时发送消息给 Graphite 做监控。
   - 批量发送：结构化的access log会交给WebRouterKafkaFilter加工（增加topic和host)，然后交给Kafka做进一步的分析。
 
 

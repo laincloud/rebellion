@@ -1,4 +1,4 @@
 # Acknowledgements
 
 - [Supervisor](http://supervisord.org/)
-- [Heka](https://github.com/mozilla-services/heka)
+- [Beats](https://github.com/elastic/beats)

@@ -1,4 +1,4 @@
-FROM laincloud/centos-lain:20170103
+FROM laincloud/centos-lain:20170405
 # Dockerfile for releasing rebellion
 
 RUN mkdir -p /var/log/supervisor && \

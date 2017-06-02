@@ -10,9 +10,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+// KafkaAddressList represents the json string of Kafka addresses list
+type KafkaAddressList string
+
 // KafkaConfHandler renders kafka.toml dynamically
 type KafkaConfHandler struct {
-	KafkaAddrs string
+	KafkaAddrs KafkaAddressList
 }
 
 // NewKafkaConfHandler initalizes a pointer of KafkaConfHandler with empty KafkaAddrs
@@ -21,7 +24,7 @@ func NewKafkaConfHandler() *KafkaConfHandler {
 }
 
 // DynamicallyHandle implements DynamicalHandler
-func (kc *KafkaConfHandler) DynamicallyHandle(update chan int) {
+func (kc *KafkaConfHandler) DynamicallyHandle(update chan interface{}) {
 	lainletCli := client.New(lainletURL)
 	for {
 		time.Sleep(3 * time.Second)
@@ -49,11 +52,11 @@ func (kc *KafkaConfHandler) DynamicallyHandle(update chan int) {
 					data = make([]string, 0)
 				}
 				newKafkaAddrBytes, _ := json.Marshal(data)
-				newKafkaAddrs := string(newKafkaAddrBytes)
+				newKafkaAddrs := KafkaAddressList(newKafkaAddrBytes)
 				if newKafkaAddrs != kc.KafkaAddrs {
+					log.Infof("Kafka address is updated: %s", newKafkaAddrs)
 					kc.KafkaAddrs = newKafkaAddrs
-					renderTemplate("kafka.toml.tmpl", "kafka.toml", kc)
-					update <- 1
+					update <- kc.KafkaAddrs
 				}
 			} else if resp.Event != "heartbeat" {
 				log.Errorf("Get lainlet event error: %s", string(resp.Data))

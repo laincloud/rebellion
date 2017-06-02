@@ -1,4 +1,8 @@
 # CHANGELOG
+## 3.0.0
+- Use lain-filebeat instead of hekad
+- Update go version
+
 ## 2.0.4
 - Update go version
 - Fix issue of calling lainlet API

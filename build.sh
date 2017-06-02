@@ -1,6 +1,21 @@
 #!/bin/bash
-set -e
-version=2.0.4
+set -ex
+
+# Install official filebeat
+wget https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-5.4.0-x86_64.rpm
+rpm -ivp filebeat-5.4.0-x86_64.rpm
+rm -rf filebeat-5.4.0-x86_64.rpm
+
+# Replace with lain_filebeat
+lain_filebeat_version=5.4.0-lain-p3
+git clone -b $lain_filebeat_version https://github.com/laincloud/beats.git $GOPATH/src/github.com/elastic/beats
+go build -o /usr/share/filebeat/bin/filebeat github.com/elastic/beats/filebeat
+
+# Install rebellion
+rebellion_version=2.3.0
+git clone -b $rebellion_version https://github.com/laincloud/rebellion.git $GOPATH/src/github.com/elastic/beats
+
+
 rm -rf hekalain heka-lain.tgz rebellion
 tmp_image='rebellion_build'
 registry='registry.aliyuncs.com/laincloud'
