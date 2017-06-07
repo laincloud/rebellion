@@ -1,15 +1,12 @@
 package core
 
 import (
-	"crypto/md5"
 	"encoding/json"
-	"fmt"
-	"os"
-	"path/filepath"
 	"reflect"
-	"strconv"
 	"strings"
 	"time"
+
+	"sort"
 
 	"github.com/laincloud/lainlet/client"
 	"github.com/mijia/sweb/log"
@@ -18,7 +15,7 @@ import (
 
 // LainAppConfHandler handles log files of lain applications
 type LainAppConfHandler struct {
-	lainAppConf map[string]*LainAppConfig
+	logInfos []LogInfo
 }
 
 type AppInfo struct {
@@ -30,32 +27,21 @@ type PodInfo struct {
 	Annotation string `json:"Annotation"`
 }
 
-type LainAppConfig struct {
-	NodeName string
-	AppName  string
-	Procs    map[string]ProcConfig
+type LogInfo struct {
+	AppName    string
+	ProcName   string
+	InstanceNo int
+	LogFile    string
 }
 
-type ProcConfig struct {
-	ProcName     string
-	InstanceNo   int
-	LogDirectory string
-	LogFile      string
-	FilePattern  string
-	Topic        string
-}
-
-// NewLainAppConfHandler initializes a pointer of LainAppConfHandler
 func NewLainAppConfHandler() *LainAppConfHandler {
 	return &LainAppConfHandler{
-		lainAppConf: make(map[string]*LainAppConfig),
+		logInfos: make([]LogInfo, 0),
 	}
 }
 
-// DynamicallyHandle implements DynamicalHandler
-func (lh *LainAppConfHandler) DynamicallyHandle(update chan int) {
+func (lh *LainAppConfHandler) DynamicallyHandle(update chan interface{}) {
 	lainletCli := client.New(lainletURL)
-	var isChanged bool
 	for {
 		time.Sleep(3 * time.Second)
 		ch, err := lainletCli.Watch("/v2/rebellion/localprocs", context.Background())
@@ -71,11 +57,12 @@ func (lh *LainAppConfHandler) DynamicallyHandle(update chan int) {
 					log.Errorf("Unmarshal error: %s", err.Error())
 					continue
 				}
-				isChanged = false
-				newLogSet := make(map[string]*LainAppConfig)
+				var newLogSet []LogInfo
 				for procName, appInfo := range data {
-					appName := strings.Split(procName, ".")[0]
-					prefix := filepath.Join(volumeDir, appName, procName)
+					procParts := strings.Split(procName, ".")
+					if len(procParts) == 0 {
+						continue
+					}
 					for _, podInfo := range appInfo.PodInfos {
 						var annotation struct {
 							Logs []string `json:"logs"`
@@ -84,60 +71,31 @@ func (lh *LainAppConfHandler) DynamicallyHandle(update chan int) {
 							log.Errorf("Unmarshal logs in annotation error: %s\n", err.Error())
 							continue
 						}
-						for _, logPath := range annotation.Logs {
-							if _, exist := newLogSet[appName]; !exist {
-								newLogSet[appName] = &LainAppConfig{
-									NodeName: hostName,
-									AppName:  appName,
-									Procs:    make(map[string]ProcConfig),
-								}
+						if annotation.Logs == nil {
+							continue
+						}
+						for _, logName := range annotation.Logs {
+							logInfo := LogInfo{
+								AppName:    procParts[0],
+								ProcName:   procName,
+								InstanceNo: podInfo.InstanceNo,
+								LogFile:    logName,
 							}
-							currentAppConf := newLogSet[appName]
-							fullPath := filepath.Clean(filepath.Join(prefix, strconv.Itoa(podInfo.InstanceNo), containerLogsDir, logPath))
-							dir, filename := filepath.Split(fullPath)
-							currentAppConf.Procs[fmt.Sprintf("%x", md5.Sum([]byte(fullPath)))] = ProcConfig{
-								ProcName:     procName,
-								InstanceNo:   podInfo.InstanceNo,
-								LogDirectory: dir,
-								FilePattern:  wildcardToRegex(filename),
-								LogFile:      filename,
-								Topic:        strings.Join([]string{procName, "log", logPath}, "."),
-							}
+							newLogSet = append(newLogSet, logInfo)
 						}
 					}
 				}
-
-				//Compare and update app config
-				for appName, appConfig := range lh.lainAppConf {
-					fileName := fmt.Sprintf("lainapp_%s.toml", appName)
-					//Clear old app log config
-					if newAppConfig, exist := newLogSet[appName]; !exist {
-						isChanged = true
-						delete(lh.lainAppConf, appName)
-						if err := os.Remove(filepath.Join(confDir, fileName)); err != nil {
-							log.Errorf("Remove %s failed: %s", fileName, err.Error())
-						} else {
-							log.Debugf("Remove %s successfully!", fileName)
-						}
-					} else if !reflect.DeepEqual(*newAppConfig, *appConfig) {
-						// Update existing app log config
-						isChanged = true
-						lh.lainAppConf[appName] = newAppConfig
-						renderTemplate(lainAppTomlTmpl, fileName, newAppConfig)
-					}
-				}
-
-				for newAppName, newAppConfig := range newLogSet {
-					//Add new app log config
-					if _, exist := lh.lainAppConf[newAppName]; !exist {
-						isChanged = true
-						lh.lainAppConf[newAppName] = newAppConfig
-						renderTemplate(lainAppTomlTmpl, fmt.Sprintf("lainapp_%s.toml", newAppName), newAppConfig)
-					}
-				}
-
-				if isChanged {
-					update <- 1
+				sort.Slice(newLogSet, func(i, j int) bool {
+					return newLogSet[i].ProcName < newLogSet[j].ProcName ||
+						(newLogSet[i].ProcName == newLogSet[j].ProcName && newLogSet[i].InstanceNo < newLogSet[j].InstanceNo) ||
+						(newLogSet[i].ProcName == newLogSet[j].ProcName && newLogSet[i].InstanceNo == newLogSet[j].InstanceNo &&
+							newLogSet[i].LogFile < newLogSet[j].LogFile)
+				})
+				if !reflect.DeepEqual(newLogSet, lh.logInfos) {
+					dumpData, _ := json.Marshal(newLogSet)
+					log.Infof("LogInfo is updated: %s", dumpData)
+					lh.logInfos = newLogSet
+					update <- lh.logInfos
 				}
 			} else if resp.Event != "heartbeat" {
 				log.Errorf("Get lainlet event error: %s", string(resp.Data))

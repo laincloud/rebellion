@@ -1,0 +1,88 @@
+filebeat.spool_size: 2048
+filebeat.idle_timeout: 3s
+
+filebeat.prospectors:
+{{- range $logInfo := .LogInfos }}
+- input_type: log
+  paths:
+    - /data/lain/volumes/{{ $logInfo.AppName }}/{{ $logInfo.ProcName }}/{{ $logInfo.InstanceNo }}/lain/logs/{{ $logName }}
+  fields:
+    app_name: {{ $logInfo.AppName }}
+    proc_name: {{ $logInfo.ProcName }}
+    instance_no: {{ $logInfo.InstanceNo }}
+    file_name: {{ $logName }}
+    log_type: app_file
+  fields_under_root: true
+  ignore_older: 24h
+  clean_inactive: 25h
+{{- end }}
+
+- input_type: log
+  paths:
+    - /var/log/syslog/messages
+  fields:
+    log_type: app_stdout
+  fields_under_root: true
+  ignore_older: 24h
+  clean_inactive: 25h
+
+- input_type: log
+  paths:
+    - /data/lain/volumes/webrouter/webrouter.worker.worker/*/var/log/nginx/*.access.log
+  fields:
+    log_type: nginx
+  fields_under_root: true
+  ignore_older: 24h
+  clean_inactive: 25h
+
+processors:
+  - drop_fields:
+      fields: ["beat", "input_type", "offset", "type", "source"]
+  - parse_regex_fields:
+      when:
+        equals:
+          log_type: nginx
+      regexp: '^(?P<remote_addr>\S+)@(?P<remote_user>\S+)@\[(?P<time_local>[^\]]+)\]@(?P<request_host>\S+)@"(?P<request_method>\S+) (?P<request_url>\S+) (?P<request_proto>\S+)"@(?P<request_status>\d+)@(?P<body_size>\d+)@"(?P<http_referer>\S+)"@(?P<user_agent>.+)@(?P<http_x_forwarded_for>[0-9\.,\s\-]+)@upstream_response_time@(?P<upstream_response_time>[0-9\.]+)@request_time@(?P<request_time>[0-9\.]+)$'
+  - parse_regex_fields:
+      when:
+        equals:
+          log_type: app_stdout
+      regexp: '^\S+\s{1,2}\d{1,2} \d{2}:\d{2}:\d{2} \S+ docker/(?P<container_id>\S+)\[\d+]: (?P<message>.*)'
+  - tag_lain_fields:
+      lainlet_address: 'lainlet.lain:{{ .LainletPort }}'
+      when:
+        equals:
+          log_type: app_stdout
+
+{{- if eq .KafkaAddr "[]" }}
+output.console:
+  codec.json:
+    pretty: true
+{{- else }}
+output.kafka:
+  hosts: {{ .KafkaAddr }}
+  topics:
+    - topic: '%{[request_host]}.access'
+      when:
+        equals:
+          log_type: nginx
+    - topic: '%{[proc_name]}'
+      when:
+        or:
+          - equals:
+              log_type: app_file
+          - equals:
+              log_type: app_stdout
+
+  partition.round_robin:
+    reachable_only: false
+  codec.json:
+    pretty: false
+
+  required_acks: 1
+  compression: gzip
+  max_message_bytes: 1000000
+{{- end }}
+# Sets log level. The default log level is info.
+# Available log levels are: critical, error, warning, info, debug
+logging.level: info
