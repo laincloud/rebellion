@@ -16,9 +16,10 @@ const (
 
 // Rebellion is the data holder rendering Filebeat template
 type Rebellion struct {
-	update    chan interface{}
-	KafkaAddr KafkaAddressList
-	LogInfos  []LogInfo
+	update      chan interface{}
+	KafkaAddr   KafkaAddressList
+	LogInfos    []LogInfo
+	LainletPort string
 }
 
 var lainletURL = "lainlet.lain:" + getEnvWithDefault("LAINLET_PORT", defaultLainletPort)
@@ -26,7 +27,8 @@ var lainletURL = "lainlet.lain:" + getEnvWithDefault("LAINLET_PORT", defaultLain
 // ListenAndUpdate is the main working goroutine of rebellion
 func Run() {
 	r := Rebellion{
-		update: make(chan interface{}),
+		update:      make(chan interface{}),
+		LainletPort: getEnvWithDefault("LAINLET_PORT", defaultLainletPort),
 	}
 	go NewKafkaConfHandler().DynamicallyHandle(r.update)
 	go NewLainAppConfHandler().DynamicallyHandle(r.update)
@@ -40,7 +42,7 @@ func Run() {
 			log.Errorf("Unknown dataType")
 			continue
 		}
-		renderTemplate(filebeatYml, filebeatYmlTmpl, r)
+		renderTemplate(filebeatYmlTmpl, filebeatYml, r)
 		reload()
 	}
 }

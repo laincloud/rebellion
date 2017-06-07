@@ -31,7 +31,7 @@ type LogInfo struct {
 	AppName    string
 	ProcName   string
 	InstanceNo int
-	LogFiles   []string
+	LogFile    string
 }
 
 func NewLainAppConfHandler() *LainAppConfHandler {
@@ -60,7 +60,7 @@ func (lh *LainAppConfHandler) DynamicallyHandle(update chan interface{}) {
 				var newLogSet []LogInfo
 				for procName, appInfo := range data {
 					procParts := strings.Split(procName, ".")
-					if len(procParts) == 0 || len(appInfo.PodInfos) == 0 {
+					if len(procParts) == 0 {
 						continue
 					}
 					for _, podInfo := range appInfo.PodInfos {
@@ -71,18 +71,25 @@ func (lh *LainAppConfHandler) DynamicallyHandle(update chan interface{}) {
 							log.Errorf("Unmarshal logs in annotation error: %s\n", err.Error())
 							continue
 						}
-						logInfo := LogInfo{
-							AppName:    procParts[0],
-							ProcName:   procName,
-							InstanceNo: podInfo.InstanceNo,
-							LogFiles:   annotation.Logs,
+						if annotation.Logs == nil {
+							continue
 						}
-						newLogSet = append(newLogSet, logInfo)
+						for _, logName := range annotation.Logs {
+							logInfo := LogInfo{
+								AppName:    procParts[0],
+								ProcName:   procName,
+								InstanceNo: podInfo.InstanceNo,
+								LogFile:    logName,
+							}
+							newLogSet = append(newLogSet, logInfo)
+						}
 					}
 				}
 				sort.Slice(newLogSet, func(i, j int) bool {
 					return newLogSet[i].ProcName < newLogSet[j].ProcName ||
-						(newLogSet[i].ProcName == newLogSet[j].ProcName && newLogSet[i].InstanceNo < newLogSet[j].InstanceNo)
+						(newLogSet[i].ProcName == newLogSet[j].ProcName && newLogSet[i].InstanceNo < newLogSet[j].InstanceNo) ||
+						(newLogSet[i].ProcName == newLogSet[j].ProcName && newLogSet[i].InstanceNo == newLogSet[j].InstanceNo &&
+							newLogSet[i].LogFile < newLogSet[j].LogFile)
 				})
 				if !reflect.DeepEqual(newLogSet, lh.logInfos) {
 					dumpData, _ := json.Marshal(newLogSet)

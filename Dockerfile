@@ -3,8 +3,9 @@ FROM laincloud/centos-lain:20170405
 
 RUN pip install supervisor && yum clean all
 
-ENV dest $GOPATH/src/github.com/laincloud/rebellion
-
 #Build rebellion
-COPY . $dest/
-RUN cd $dest && go build -o /rebellion main.go
+COPY . $GOPATH/src/github.com/laincloud/rebellion
+RUN $GOPATH/src/github.com/laincloud/rebellion/build.sh
+
+VOLUME ["/data/lain/volumes/", "/var/lib/filebeat/", "/var/log/filebeat/", "/var/log/supervisor", "/var/log/syslog/"]
+ENTRYPOINT ["supervisord", "-c", "/etc/supervisord.conf"]

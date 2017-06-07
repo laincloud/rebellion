@@ -1,42 +1,15 @@
 #!/bin/bash
 set -ex
 
-# Install official filebeat
-wget https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-5.4.0-x86_64.rpm
-rpm -ivp filebeat-5.4.0-x86_64.rpm
-rm -rf filebeat-5.4.0-x86_64.rpm
-
-# Replace with lain_filebeat
-lain_filebeat_version=5.4.0-lain-p3
-git clone -b $lain_filebeat_version https://github.com/laincloud/beats.git $GOPATH/src/github.com/elastic/beats
-go build -o /usr/share/filebeat/bin/filebeat github.com/elastic/beats/filebeat
+# Install lain filebeat
+FILEBEAT_VERSION='5.4.0_lain_p2'
+FILEBEAT_TAG='v5.4.0-lain-p2'
+curl -L -o filebeat-${FILEBEAT_VERSION}-1.x86_64.rpm https://github.com/laincloud/beats/releases/download/${FILEBEAT_TAG}/filebeat-${FILEBEAT_VERSION}-1.x86_64.rpm
+rpm -ivp filebeat-${FILEBEAT_VERSION}-1.x86_64.rpm
+rm -f filebeat-${FILEBEAT_VERSION}-1.x86_64.rpm
 
 # Install rebellion
-rebellion_version=2.3.0
-git clone -b $rebellion_version https://github.com/laincloud/rebellion.git $GOPATH/src/github.com/elastic/beats
-
-
-rm -rf hekalain heka-lain.tgz rebellion
-tmp_image='rebellion_build'
-registry='registry.aliyuncs.com/laincloud'
-docker build --no-cache -t $tmp_image .
-tmp_container='rebellion_instance'
-docker create --name $tmp_container rebellion_build
-docker cp $tmp_container:/rebellion ./
-docker rm -f $tmp_container
-docker rmi -f $tmp_image
-
-# Build hekalain
-git clone https://github.com/laincloud/hekalain.git
-./hekalain/build.sh
-rm -rf hekalain
-
-tar -xvf heka-lain.tgz
-rm -f heka-lain.tgz
-heka_dir=`ls -d heka-lain-*`
-mv $heka_dir heka-lain
-
-docker build --no-cache -t $registry/rebellion:$version -f Dockerfile.release .
-
-rm -rf heka-lain rebellion
-docker push $registry/rebellion:$version
+go build -o /usr/local/bin/rebellion github.com/laincloud/rebellion
+cp $GOPATH/src/github.com/laincloud/rebellion/templates/filebeat.yml.tmpl /etc/filebeat/
+cp $GOPATH/src/github.com/laincloud/rebellion/conf/supervisord.conf /etc/supervisord.conf
+rm -rf $GOPATH/src/github.com

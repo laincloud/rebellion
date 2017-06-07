@@ -1,7 +1,9 @@
 # CHANGELOG
-## 3.0.0
+## 2.3.0
 - Use lain-filebeat instead of hekad
-- Update go version
+- Update go version to 1.8
+- Remove statistic functions of nginx accesses. It's recommended to stat accesses after Kafka.
+- Update docs.
 
 ## 2.0.4
 - Update go version

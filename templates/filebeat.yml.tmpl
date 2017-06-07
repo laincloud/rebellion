@@ -2,16 +2,15 @@ filebeat.spool_size: 2048
 filebeat.idle_timeout: 3s
 
 filebeat.prospectors:
-{{- range logInfo := .LogInfos }}
+{{- range $logInfo := .LogInfos }}
 - input_type: log
   paths:
-    {{- range logName := .logInfo.LogFiles }}
     - /data/lain/volumes/{{ $logInfo.AppName }}/{{ $logInfo.ProcName }}/{{ $logInfo.InstanceNo }}/lain/logs/{{ $logName }}
-    {{- end }}
   fields:
     app_name: {{ $logInfo.AppName }}
     proc_name: {{ $logInfo.ProcName }}
     instance_no: {{ $logInfo.InstanceNo }}
+    file_name: {{ $logName }}
     log_type: app_file
   fields_under_root: true
   ignore_older: 24h
@@ -20,12 +19,13 @@ filebeat.prospectors:
 
 - input_type: log
   paths:
-    - /var/log/messages
+    - /var/log/syslog/messages
   fields:
     log_type: app_stdout
   fields_under_root: true
   ignore_older: 24h
   clean_inactive: 25h
+
 - input_type: log
   paths:
     - /data/lain/volumes/webrouter/webrouter.worker.worker/*/var/log/nginx/*.access.log
@@ -34,13 +34,10 @@ filebeat.prospectors:
   fields_under_root: true
   ignore_older: 24h
   clean_inactive: 25h
-#output.console:
-#  codec.json:
-#    pretty: true
 
 processors:
   - drop_fields:
-      fields: ["beat", "input_type", "offset", "type"]
+      fields: ["beat", "input_type", "offset", "type", "source"]
   - parse_regex_fields:
       when:
         equals:
@@ -50,13 +47,20 @@ processors:
       when:
         equals:
           log_type: app_stdout
-      regexp: '^\S+ \d{2} \d{2}:\d{2}:\d{2} \S+ docker/(?P<container_id>\S+)\[\d+]: (?P<message>.*)'
+      regexp: '^\S+\s{1,2}\d{1,2} \d{2}:\d{2}:\d{2} \S+ docker/(?P<container_id>\S+)\[\d+]: (?P<message>.*)'
   - tag_lain_fields:
+      lainlet_address: 'lainlet.lain:{{ .LainletPort }}'
       when:
-        log_type: app_stdout
+        equals:
+          log_type: app_stdout
 
+{{- if eq .KafkaAddr "[]" }}
+output.console:
+  codec.json:
+    pretty: true
+{{- else }}
 output.kafka:
-  hosts: {{ .KafkaAddresses }}
+  hosts: {{ .KafkaAddr }}
   topics:
     - topic: '%{[request_host]}.access'
       when:
@@ -78,7 +82,7 @@ output.kafka:
   required_acks: 1
   compression: gzip
   max_message_bytes: 1000000
-
+{{- end }}
 # Sets log level. The default log level is info.
 # Available log levels are: critical, error, warning, info, debug
 logging.level: info
