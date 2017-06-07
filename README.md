@@ -1,5 +1,5 @@
 # Rebellion
-[![MIT license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://travis-ci.org/laincloud/rebellion.svg?branch=master)](https://travis-ci.org/laincloud/rebellion) [![MIT license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
 ## Introduction
 Rebellion 是 LAIN 中负责管理日志数据的 layer0 组件, 以 host 模式运行在 docker 上。但 Rebellion 并不是单进程的容器，而是由 supervisord 管理的多进程容器。Rebellion 主要包括两个部分：
 - [lain-filebeat](https://github.com/laincloud/beats)：负责接受日志输入、处理并发送。
