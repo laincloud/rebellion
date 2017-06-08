@@ -3,10 +3,9 @@ package core
 import (
 	"encoding/json"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
-
-	"sort"
 
 	"github.com/laincloud/lainlet/client"
 	"github.com/mijia/sweb/log"
@@ -86,10 +85,12 @@ func (lh *LainAppConfHandler) DynamicallyHandle(update chan interface{}) {
 					}
 				}
 				sort.Slice(newLogSet, func(i, j int) bool {
-					return newLogSet[i].ProcName < newLogSet[j].ProcName ||
-						(newLogSet[i].ProcName == newLogSet[j].ProcName && newLogSet[i].InstanceNo < newLogSet[j].InstanceNo) ||
-						(newLogSet[i].ProcName == newLogSet[j].ProcName && newLogSet[i].InstanceNo == newLogSet[j].InstanceNo &&
-							newLogSet[i].LogFile < newLogSet[j].LogFile)
+					if newLogSet[i].ProcName != newLogSet[j].ProcName {
+						return newLogSet[i].ProcName < newLogSet[j].ProcName
+					} else if newLogSet[i].InstanceNo != newLogSet[j].InstanceNo {
+						return newLogSet[i].InstanceNo < newLogSet[j].InstanceNo
+					}
+					return newLogSet[i].LogFile < newLogSet[j].LogFile
 				})
 				if !reflect.DeepEqual(newLogSet, lh.logInfos) {
 					dumpData, _ := json.Marshal(newLogSet)

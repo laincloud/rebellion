@@ -2,20 +2,30 @@ filebeat.spool_size: 2048
 filebeat.idle_timeout: 3s
 
 filebeat.prospectors:
-{{- range $logInfo := .LogInfos }}
 - input_type: log
   paths:
-    - /data/lain/volumes/{{ $logInfo.AppName }}/{{ $logInfo.ProcName }}/{{ $logInfo.InstanceNo }}/lain/logs/{{ $logInfo.LogFile }}
+    - /data/lain/volumes/test_app_1/test_app_1.web.web/1/lain/logs/debug.log
   fields:
-    app_name: {{ $logInfo.AppName }}
-    proc_name: {{ $logInfo.ProcName }}
-    instance_no: {{ $logInfo.InstanceNo }}
-    file_name: {{ $logInfo.LogFile }}
+    app_name: test_app_1
+    proc_name: test_app_1.web.web
+    instance_no: 1
+    file_name: debug.log
     log_type: app_file
   fields_under_root: true
   ignore_older: 24h
   clean_inactive: 25h
-{{- end }}
+- input_type: log
+  paths:
+    - /data/lain/volumes/test_app_1/test_app_1.web.web/1/lain/logs/warn.log
+  fields:
+    app_name: test_app_1
+    proc_name: test_app_1.web.web
+    instance_no: 1
+    file_name: warn.log
+    log_type: app_file
+  fields_under_root: true
+  ignore_older: 24h
+  clean_inactive: 25h
 
 - input_type: log
   paths:
@@ -49,18 +59,12 @@ processors:
           log_type: app_stdout
       regexp: '^\S+\s{1,2}\d{1,2} \d{2}:\d{2}:\d{2} \S+ docker/(?P<container_id>\S+)\[\d+]: (?P<message>.*)'
   - tag_lain_fields:
-      lainlet_address: 'lainlet.lain:{{ .LainletPort }}'
+      lainlet_address: 'lainlet.lain:9001'
       when:
         equals:
           log_type: app_stdout
-
-{{- if eq .KafkaAddr "[]" }}
-output.console:
-  codec.json:
-    pretty: true
-{{- else }}
 output.kafka:
-  hosts: {{ .KafkaAddr }}
+  hosts: ["192.168.0.11:7001","192.168.0.12:7001"]
   topics:
     - topic: '%{[request_host]}.access'
       when:
@@ -82,7 +86,6 @@ output.kafka:
   required_acks: 1
   compression: gzip
   max_message_bytes: 1000000
-{{- end }}
 # Sets log level. The default log level is info.
 # Available log levels are: critical, error, warning, info, debug
 logging.level: info
