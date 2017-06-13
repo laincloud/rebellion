@@ -28,9 +28,10 @@ filebeat.prospectors:
 
 - input_type: log
   paths:
-    - /data/lain/volumes/webrouter/webrouter.worker.worker/*/var/log/nginx/*.access.log
+    - /data/lain/volumes/webrouter/webrouter.worker.worker/*/var/log/nginx/*___*.access.log
   fields:
     log_type: nginx
+    request_host: unknown
   fields_under_root: true
   ignore_older: 24h
   clean_inactive: 25h
@@ -42,7 +43,7 @@ processors:
       when:
         equals:
           log_type: nginx
-      regexp: '^(?P<remote_addr>\S+)@(?P<remote_user>\S+)@\[(?P<time_local>[^\]]+)\]@(?P<request_host>\S+)@"(?P<request_method>\S+) (?P<request_url>\S+) (?P<request_proto>\S+)"@(?P<request_status>\d+)@(?P<body_size>\d+)@"(?P<http_referer>\S+)"@(?P<user_agent>.+)@(?P<http_x_forwarded_for>[0-9\.,\s\-]+)@upstream_response_time@(?P<upstream_response_time>[0-9\.]+)@request_time@(?P<request_time>[0-9\.]+)$'
+      regexp: '^(?P<remote_addr>\S+)@(?P<remote_user>\S+)@\[(?P<time_local>[^\]]+)\]@(?P<request_host>\S+)@"(?P<request_method>\S+) (?P<request_url>\S+) (?P<request_proto>\S+)"@(?P<request_status>\d+)@(?P<body_size>\d+)@"(?P<http_referer>\S+)"@(?P<user_agent>.+)@(?P<http_x_forwarded_for>[0-9\.,\s\-]+)@upstream_response_time@(?P<upstream_response_time>[0-9\.\-]+)@request_time@(?P<request_time>[0-9\.\-]+)$'
   - parse_regex_fields:
       when:
         equals:
