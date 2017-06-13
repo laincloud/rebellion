@@ -21,7 +21,7 @@ Rebellion 目前主要处理三类日志流：
 
 ### Run
 Rebellion 的运行是以 Host 模式运行的 Container，目前已经作为 Service 在 boostrap 时就已经部署并运行了。
-Service中运行的指令为：
+Service 中运行的指令为：
 
 ```bash
 /usr/bin/docker run \
@@ -55,15 +55,27 @@ Service中运行的指令为：
 
 > 目前由于所有的日志都发送至Kafka，所以部署时集群应该在etcd中配置了/lain/config/kafka
 
-## Upgrade from 2.0.x
-步骤如下：
-1. 停掉所有节点的旧 Rebellion 服务 `systemctl stop rebellion`
-1. 更新所有节点的 Rebellion 镜像以及配置，并执行 `systemctl daemon-reload`。
-1. 停掉所有节点的旧 Rebellion 服务 `systemctl stop rebellion`
-1. 清空所有的日志文件，包括 /var/log/messages, nginx 访问日志，以及应用落地日志。
-1. 启动所有节点的新 Rebellion 服务。`systemctl start rebellion`
+## Upgrade
 
-> 从 3 结束到开始 4 之前会丢失少量日志，因此建议分节点进行。
+由于 `v2.3.0` 和 `2.0.x` 配置及收集工具不兼容，因此无法直接从 `2.0.x` 升级到 `v2.3.x` 及更高版本，需要先升级至 `v2.3.0`。
+
+### `2.0.x` -> `v2.3.0`
+执行 LAIN 的 ansible 任务 `rebellion-upgrade-2.0.x-to-v2.3.0`。
+
+```
+ansible-playbook -i playbooks/cluster -e "role=rebellion-upgrade-2.0.x-to-v2.3.0" playbooks/role.yaml
+```
+
+### `v2.3.0` -> `v2.3.x` (x > 0)
+执行 LAIN 的 ansible 任务 `rebellion-upgrade`，参数 `upgrade_version` 为目的版本。
+
+例如升级到 `v2.3.1`：
+
+```
+ansible-playbook -i playbooks/cluster -e "role=rebellion-upgrade" -e "upgrade_version=v2.3.1" playbooks/role.yaml
+```
+
+> 升级时会丢失少量日志，建议在日志输出量较低的时间段进行。
 
 ## License
 Rebellion 遵循[MIT](https://github.com/laincloud/rebellion/blob/master/LICENSE)开源协议.
