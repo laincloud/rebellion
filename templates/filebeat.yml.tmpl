@@ -38,7 +38,7 @@ filebeat.prospectors:
 
 processors:
   - drop_fields:
-      fields: ["beat", "input_type", "offset", "type", "source"]
+      fields: ["beat.name", "beat.version", "input_type", "offset", "type", "source"]
   - parse_regex_fields:
       when:
         equals:
