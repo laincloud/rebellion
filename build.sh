@@ -2,8 +2,8 @@
 set -ex
 
 # Install lain filebeat
-FILEBEAT_VERSION='5.4.0_lain_p2'
-FILEBEAT_TAG='v5.4.0-lain-p2'
+FILEBEAT_VERSION='5.4.0_lain_p3'
+FILEBEAT_TAG='v5.4.0-lain-p3'
 curl -L -o filebeat-${FILEBEAT_VERSION}-1.x86_64.rpm https://github.com/laincloud/beats/releases/download/${FILEBEAT_TAG}/filebeat-${FILEBEAT_VERSION}-1.x86_64.rpm
 rpm -ivp filebeat-${FILEBEAT_VERSION}-1.x86_64.rpm
 rm -f filebeat-${FILEBEAT_VERSION}-1.x86_64.rpm

@@ -8,6 +8,7 @@ filebeat.prospectors:
     - /data/lain/volumes/{{ $logInfo.AppName }}/{{ $logInfo.ProcName }}/{{ $logInfo.InstanceNo }}/lain/logs/{{ $logInfo.LogFile }}
   fields:
     app_name: {{ $logInfo.AppName }}
+    app_version: {{ $logInfo.AppVersion }}
     proc_name: {{ $logInfo.ProcName }}
     instance_no: {{ $logInfo.InstanceNo }}
     file_name: {{ $logInfo.LogFile }}
