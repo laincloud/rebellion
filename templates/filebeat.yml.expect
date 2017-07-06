@@ -7,6 +7,7 @@ filebeat.prospectors:
     - /data/lain/volumes/test_app_1/test_app_1.web.web/1/lain/logs/debug.log
   fields:
     app_name: test_app_1
+    app_version: abcdefg
     proc_name: test_app_1.web.web
     instance_no: 1
     file_name: debug.log
@@ -19,6 +20,7 @@ filebeat.prospectors:
     - /data/lain/volumes/test_app_1/test_app_1.web.web/1/lain/logs/warn.log
   fields:
     app_name: test_app_1
+    app_version: abcdefg
     proc_name: test_app_1.web.web
     instance_no: 1
     file_name: warn.log

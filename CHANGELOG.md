@@ -1,4 +1,7 @@
 # CHANGELOG
+## 2.3.2
+- Add `app_version` field. (Need lainlet >= 2.3.2)
+
 ## 2.3.1
 - Restore `beat.hostname` field.
 

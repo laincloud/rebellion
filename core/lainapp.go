@@ -23,11 +23,13 @@ type AppInfo struct {
 
 type PodInfo struct {
 	InstanceNo int    `json:"InstanceNo"`
+	AppVersion string `json:"AppVersion"`
 	Annotation string `json:"Annotation"`
 }
 
 type LogInfo struct {
 	AppName    string
+	AppVersion string
 	ProcName   string
 	InstanceNo int
 	LogFile    string
@@ -76,6 +78,7 @@ func (lh *LainAppConfHandler) DynamicallyHandle(update chan interface{}) {
 						for _, logName := range annotation.Logs {
 							logInfo := LogInfo{
 								AppName:    procParts[0],
+								AppVersion: podInfo.AppVersion,
 								ProcName:   procName,
 								InstanceNo: podInfo.InstanceNo,
 								LogFile:    logName,

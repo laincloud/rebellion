@@ -14,12 +14,14 @@ func TestRenderFile(t *testing.T) {
 		LogInfos: []LogInfo{
 			{
 				AppName:    "test_app_1",
+				AppVersion: "abcdefg",
 				ProcName:   "test_app_1.web.web",
 				InstanceNo: 1,
 				LogFile:    "debug.log",
 			},
 			{
 				AppName:    "test_app_1",
+				AppVersion: "abcdefg",
 				ProcName:   "test_app_1.web.web",
 				InstanceNo: 1,
 				LogFile:    "warn.log",
