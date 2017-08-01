@@ -26,6 +26,13 @@ func TestRenderFile(t *testing.T) {
 				InstanceNo: 1,
 				LogFile:    "warn.log",
 			},
+			{
+				AppName:    "test_app_1",
+				AppVersion: "abcdefg",
+				ProcName:   "test_app_1.web.web",
+				InstanceNo: 1,
+				LogFile:    "default/current",
+			},
 		},
 		LainletPort: "9001",
 		KafkaAddr:   KafkaAddressList(data),
