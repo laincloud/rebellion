@@ -28,6 +28,19 @@ filebeat.prospectors:
   fields_under_root: true
   ignore_older: 24h
   clean_inactive: 25h
+- input_type: log
+  paths:
+    - /data/lain/volumes/test_app_1/test_app_1.web.web/1/lain/logs/default/current
+  fields:
+    app_name: test_app_1
+    app_version: abcdefg
+    proc_name: test_app_1.web.web
+    instance_no: 1
+    file_name: default/current
+    log_type: app_file
+  fields_under_root: true
+  ignore_older: 24h
+  clean_inactive: 25h
 
 - input_type: log
   paths:

@@ -12,6 +12,8 @@ import (
 	"golang.org/x/net/context"
 )
 
+const defaultStdoutLogFile = "default/current"
+
 // LainAppConfHandler handles log files of lain applications
 type LainAppConfHandler struct {
 	logInfos []LogInfo
@@ -73,8 +75,9 @@ func (lh *LainAppConfHandler) DynamicallyHandle(update chan interface{}) {
 							continue
 						}
 						if annotation.Logs == nil {
-							continue
+							annotation.Logs = make([]string, 0)
 						}
+						annotation.Logs = append(annotation.Logs, defaultStdoutLogFile)
 						for _, logName := range annotation.Logs {
 							logInfo := LogInfo{
 								AppName:    procParts[0],
