@@ -1,6 +1,6 @@
 # Rebellion
 
-[![Build Status](https://travis-ci.org/laincloud/rebellion.svg?branch=master)](https://travis-ci.org/laincloud/rebellion) [![MIT license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://travis-ci.org/laincloud/rebellion.svg?branch=master)](https://travis-ci.org/laincloud/rebellion) 
 [![codecov](https://codecov.io/gh/laincloud/rebellion/branch/master/graph/badge.svg)](https://codecov.io/gh/laincloud/rebellion)
 [![MIT license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
 
