@@ -1,4 +1,4 @@
-FROM laincloud/centos-lain:20170405
+FROM laincloud/centos-lain:20180103
 # Dockerfile for building rebellion
 
 RUN pip install supervisor && yum clean all
