@@ -1,3 +1,5 @@
+# TAGS 2.3.4 latest
+
 FROM laincloud/centos-lain:20180103
 # Dockerfile for building rebellion
 
